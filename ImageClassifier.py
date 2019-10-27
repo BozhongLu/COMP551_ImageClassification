@@ -11,3 +11,4 @@ from PIL import Image
 
 plt.imshow(np.array(train_images[0]), cmap='gray', vmin=0, vmax=255)
 plt.show()
+
