@@ -92,13 +92,33 @@ def test():
         100. * correct / len(test_loader.dataset)))
 
 
-for epoch in range(1,5):
+for epoch in range(1,20):
     train(epoch)
     test ()
 
+# 99% accuracy after 11 epochs
+
+torch.save(model.state_dict(), "C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99")
+
+model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99"))
+model.eval()
+
+import matplotlib.pyplot as plt
 
 
+nrImage=0
+single_loaded_img=train_loader.dataset.test_data[nrImage]
+single_loaded_img = single_loaded_img.to(device)
+single_loaded_img = Variable(single_loaded_img)
+single_loaded_img = single_loaded_img[None, None]
+single_loaded_img = single_loaded_img.type('torch.FloatTensor') # instead of DoubleTensor
 
+out = model(single_loaded_img)
+out_predict = model(single_loaded_img)
+pred = out.data.max(1,keepdim=True)[1]
+
+plt.imshow(train_loader.dataset.test_data[nrImage] ,cmap="gray_r")
+plt.show()
 
 
 
