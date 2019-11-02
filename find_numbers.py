@@ -20,11 +20,14 @@ example=train_images[1]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
+# define white-black threshhold
+thresh = cv2.threshold(example, 150, 255,cv2.THRESH_BINARY)[1]
 
-thresh = cv2.threshold(example, 180, 255,cv2.THRESH_BINARY)[1]
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
 thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
+plt.imshow(np.array(thresh), cmap='gray_r')
+plt.show()
 
 thresh= thresh.astype('uint8')
 
@@ -38,24 +41,34 @@ for c in cnts:
     (x, y, w, h) = cv2.boundingRect(c)
 
     # if the contour is sufficiently large, it must be a digit
-    if w >= 10 and (h >= 10 and h <= 40):
+    if w >= 10 and (h >= 20 and h <= 40):
         digitCnts.append(c)
 
-for i in len(digitCnts):
 
-    left = np.min(digitCnts[1][:,0][:,0])
-    top = np.max(digitCnts[1][:,0][:,1])
-    right = np.max(digitCnts[1][:,0][:,0])
-    bottom = np.min(digitCnts[1][:,0][:,1])
 
-    plt.imshow(thresh,cmap="gray")
+
+for i in range(0,len(digitCnts)):
+    left = np.min(digitCnts[i][:,0][:,0])
+    top = np.max(digitCnts[i][:,0][:,1])
+    right = np.max(digitCnts[i][:,0][:,0])
+    bottom = np.min(digitCnts[i][:,0][:,1])
+
+    left2 = round((left+right)/2)-14
+    right2 = round((left+right)/2)+14
+    top2=round((bottom+top)/2)+14
+    bottom2 = round((bottom + top) / 2) - 14
+
+    # Create a Rectangle patch
+    rect = Rectangle((left,top),right-left,bottom-top,linewidth=3,edgecolor='red',facecolor='none')
+    rect2 = Rectangle((left2,top2),right2-left2,bottom2-top2,linewidth=3,edgecolor='blue',facecolor='none')
+
+    plt.imshow(thresh, cmap="gray_r")
     # Get the current reference
     ax = plt.gca()
-    # Create a Rectangle patch
-    rect = Rectangle((left,top),right-left,bottom-top,linewidth=1,edgecolor='r',facecolor='none')
+
     # Add the patch to the Axes
     ax.add_patch(rect)
-
+    ax.add_patch(rect2)
 plt.show()
 
 for contour in digitCnts:
