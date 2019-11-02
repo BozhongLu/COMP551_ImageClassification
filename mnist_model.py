@@ -98,16 +98,18 @@ for epoch in range(1,20):
 
 # 99% accuracy after 11 epochs
 
-torch.save(model.state_dict(), "C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99")
+#torch.save(model.state_dict(), "C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99")
+
+model = TheNet()
 
 model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99"))
 model.eval()
 
 import matplotlib.pyplot as plt
-
-
+single_loaded_img= torch.tensor(new)
+new.shape
 nrImage=0
-single_loaded_img=train_loader.dataset.test_data[nrImage]
+#single_loaded_img=train_loader.dataset.test_data[nrImage]
 single_loaded_img = single_loaded_img.to(device)
 single_loaded_img = Variable(single_loaded_img)
 single_loaded_img = single_loaded_img[None, None]

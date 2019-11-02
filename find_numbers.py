@@ -45,8 +45,6 @@ for c in cnts:
         digitCnts.append(c)
 
 
-
-
 for i in range(0,len(digitCnts)):
     left = np.min(digitCnts[i][:,0][:,0])
     top = np.max(digitCnts[i][:,0][:,1])
@@ -70,6 +68,15 @@ for i in range(0,len(digitCnts)):
     ax.add_patch(rect)
     ax.add_patch(rect2)
 plt.show()
+
+#new=train_images[1][int(bottom2):int(top2)]
+#new=new[:,int(left2):int(right2)]
+new=thresh[int(bottom2):int(top2)]
+new=new[:,int(left2):int(right2)]
+new.shape
+plt.imshow(np.array(new), cmap='gray_r')
+plt.show()
+
 
 for contour in digitCnts:
    cv2.drawContours(np.array(thresh), contour, 1, (0, 255, 0), 3)
