@@ -106,8 +106,11 @@ model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_
 model.eval()
 
 import matplotlib.pyplot as plt
-single_loaded_img= torch.tensor(new)
-new.shape
+nr=38346
+single_loaded_img= torch.tensor(training[0][nr])
+plt.imshow(training[0][nr] , cmap="gray_r")
+plt.show()
+
 nrImage=0
 #single_loaded_img=train_loader.dataset.test_data[nrImage]
 single_loaded_img = single_loaded_img.to(device)
@@ -116,8 +119,8 @@ single_loaded_img = single_loaded_img[None, None]
 single_loaded_img = single_loaded_img.type('torch.FloatTensor') # instead of DoubleTensor
 
 out = model(single_loaded_img)
-out_predict = model(single_loaded_img)
 pred = out.data.max(1,keepdim=True)[1]
+pred
 
 plt.imshow(train_loader.dataset.test_data[nrImage] ,cmap="gray_r")
 plt.show()
