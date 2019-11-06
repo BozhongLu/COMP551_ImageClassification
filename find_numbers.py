@@ -14,7 +14,7 @@ train_images = pd.read_pickle('train_max_x')
 test_images = pd.read_pickle('test_max_x')
 
 
-example=train_images[1769]
+example=train_images[4000]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
@@ -28,7 +28,7 @@ def imagePreprocessing(imageSet):
 
     for i in range(0,len(imageSet)):
         # define white-black threshhold
-        thresh = cv2.threshold(imageSet[i], 235, 255,cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(imageSet[i], 230, 255,cv2.THRESH_BINARY)[1]
         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
         #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
         thresh= thresh.astype('uint8')
@@ -95,15 +95,23 @@ def imagePreprocessing(imageSet):
             if i%100 ==0:
                 print(str(i)+"   finished")
     #Testing
-    plt.imshow(output[0][1769], cmap="gray_r")
+    plt.imshow(testing[0][4000], cmap="gray_r")
     plt.show()
 
-    plt.imshow(output[1][1769], cmap="gray_r")
+    plt.imshow(testing[1][4000], cmap="gray_r")
     plt.show()
 
-    plt.imshow(output[0][1769] , cmap="gray_r")
+    plt.imshow(testing[2][4000], cmap="gray_r")
     plt.show()
 
-    plt.imshow(output[1][1769] , cmap="gray_r")
+    plt.imshow(output[0][4000] , cmap="gray_r")
     plt.show()
+
+    plt.imshow(output[1][4000] , cmap="gray_r")
+    plt.show()
+
+    plt.imshow(output[2][4000], cmap="gray_r")
+    plt.show()
+
+imagePreprocessing(train_images)
 
