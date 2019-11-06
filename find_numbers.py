@@ -70,26 +70,24 @@ for i in range(0,len(train_images)):
 
         del(digitw[a[0][0]])
 
-        # new=train_images[1][int(bottom2):int(top2)]
-        # new=new[:,int(left2):int(right2)]
+        # cut the digits area out from the preprocessed images
         new = thresh[int(top):int(top + 28)]
         new = new[:, int(left):int(left + 28)]
-
-        temp = new
+        # Save for comparison
         testing[n][i] = new
-
-        coords = np.column_stack(np.where(temp > 0))
+        #Rotate the image to a correct angle to improve accuracy
+        coords = np.column_stack(np.where(new > 0))
         angle = cv2.minAreaRect(coords)[-1]
         if angle < -45:
            angle = -(90 + angle)
         else:
            angle = -angle
 
-        # rotate the image to deskew it
-        (h, w) = temp.shape[:2]
+        (h, w) = new.shape[:2]
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        rotated = cv2.warpAffine(temp, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        rotated = cv2.warpAffine(new, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        #Define a clearer threshold for the preprocessed images
         newthresh = cv2.threshold(rotated, 100, 255, cv2.THRESH_BINARY)[1]
         training[n][i]=newthresh
         if i%100 ==0:
