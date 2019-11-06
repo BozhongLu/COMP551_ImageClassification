@@ -14,15 +14,16 @@ train_images = pd.read_pickle('train_max_x')
 test_images = pd.read_pickle('test_max_x')
 
 
-example=train_images[0]
+example=train_images[1763]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
+testing = np.zeros([3,50000,28,28])
 training= np.zeros([3,50000,28,28])
 
 for i in range(0,len(train_images)):
     # define white-black threshhold
-    thresh = cv2.threshold(train_images[i], 230, 255,cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(train_images[i], 240, 255,cv2.THRESH_BINARY)[1]
     #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
     #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     thresh= thresh.astype('uint8')
@@ -46,7 +47,6 @@ for i in range(0,len(train_images)):
         digitCnts.append(c)
         digitw.append(w*h)
 
-    len(digitCnts)
 
     for n in range(0,3):
         a=np.where(np.array(digitw)==max(digitw))
@@ -74,34 +74,32 @@ for i in range(0,len(train_images)):
         # new=new[:,int(left2):int(right2)]
         new = thresh[int(top):int(top + 28)]
         new = new[:, int(left):int(left + 28)]
-        training[n][i]=new
+
+        temp = new
+        testing[n][i] = new
+
+        coords = np.column_stack(np.where(temp > 0))
+        angle = cv2.minAreaRect(coords)[-1]
+        if angle < -45:
+           angle = -(90 + angle)
+        else:
+           angle = -angle
+
+        # rotate the image to deskew it
+        (h, w) = temp.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(temp, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        newthresh = cv2.threshold(rotated, 100, 255, cv2.THRESH_BINARY)[1]
+        training[n][i]=newthresh
         if i%100 ==0:
             print(str(i)+"   finished")
 
-
-
-        #rect = Rectangle((x, y), w, h, linewidth=3, edgecolor='red', facecolor='none')
-        # Create a Rectangle patch
-        #rect = Rectangle((left,top),28,28,linewidth=3,edgecolor='red',facecolor='none')
-
-        #plt.imshow(thresh, cmap="gray_r")
-        # Get the current reference
-        #ax = plt.gca()
-
-        # Add the patch to the Axes
-        #ax.add_patch(rect)
-        #ax.add_patch(rect2)
-        #plt.show()
-
-
-        #new.shape
-        #plt.imshow(np.array(new), cmap='gray_r')
-        #plt.show()
-
-
-plt.imshow(training[0][1760] , cmap="gray_r")
+plt.imshow(testing[0][1763], cmap="gray_r")
 plt.show()
 
+plt.imshow(training[0][1763] , cmap="gray_r")
+plt.show()
 
 
 
