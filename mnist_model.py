@@ -4,6 +4,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
+from sklearn.metrics import confusion_matrix
+from sklearn import metrics
+
 
 """Variables to determine"""
 batch_size = 64
@@ -105,25 +108,39 @@ model = TheNet()
 model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99"))
 model.eval()
 
-import matplotlib.pyplot as plt
-nr=38346
-single_loaded_img= torch.tensor(training[0][nr])
-plt.imshow(training[0][nr] , cmap="gray_r")
-plt.show()
+result= np.zeros([4,50000])
 
-nrImage=0
-#single_loaded_img=train_loader.dataset.test_data[nrImage]
-single_loaded_img = single_loaded_img.to(device)
-single_loaded_img = Variable(single_loaded_img)
-single_loaded_img = single_loaded_img[None, None]
-single_loaded_img = single_loaded_img.type('torch.FloatTensor') # instead of DoubleTensor
+for a in range(0,len(training[1])):
+    for i in range(0,3):
+        single_loaded_img= torch.tensor(training[i][a])
+        #plt.imshow(training[2][nr+235] , cmap="gray_r")
+        #plt.show()
 
-out = model(single_loaded_img)
-pred = out.data.max(1,keepdim=True)[1]
-pred
+        #nrImage=0
+        #single_loaded_img=train_loader.dataset.test_data[nrImage]
+        single_loaded_img = single_loaded_img.to(device)
+        single_loaded_img = Variable(single_loaded_img)
+        single_loaded_img = single_loaded_img[None, None]
+        single_loaded_img = single_loaded_img.type('torch.FloatTensor') # instead of DoubleTensor
 
-plt.imshow(train_loader.dataset.test_data[nrImage] ,cmap="gray_r")
-plt.show()
+        out = model(single_loaded_img)
+        pred = out.data.max(1,keepdim=True)[1]
+        result[i][a]=pred.item()
+        if a%100 ==0:
+            print(str(a)+"   finished")
+
+
+import pandas as pd
+Y= pd.read_csv('train_max_y.csv',usecols=[1])
+
+result[3]=np.max(result[0:3], axis=0)
+metrics.accuracy_score(Y,result[3])
+
+
+
+
+#plt.imshow(train_loader.dataset.test_data[nrImage] ,cmap="gray_r")
+#plt.show()
 
 
 

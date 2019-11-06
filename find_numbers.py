@@ -22,9 +22,9 @@ training= np.zeros([3,50000,28,28])
 
 for i in range(0,len(train_images)):
     # define white-black threshhold
-    thresh = cv2.threshold(train_images[i], 230, 255,cv2.THRESH_BINARY)[1]
-    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
-    #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    thresh = cv2.threshold(train_images[i], 210, 255,cv2.THRESH_BINARY)[1]
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 2))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     thresh= thresh.astype('uint8')
 
     #plt.imshow(thresh, cmap="gray_r")
@@ -95,8 +95,8 @@ for i in range(0,len(train_images)):
 
 
         #new.shape
-        #plt.imshow(np.array(new), cmap='gray_r')
-        #plt.show()
+        plt.imshow(train_images[0], cmap='gray_r')
+        plt.show()
 
 
 plt.imshow(training[0][1760] , cmap="gray_r")
