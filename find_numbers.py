@@ -14,7 +14,7 @@ train_images = pd.read_pickle('train_max_x')
 test_images = pd.read_pickle('test_max_x')
 
 
-example=train_images[1763]
+example=train_images[1769]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
@@ -23,7 +23,7 @@ training= np.zeros([3,50000,28,28])
 
 for i in range(0,len(train_images)):
     # define white-black threshhold
-    thresh = cv2.threshold(train_images[i], 240, 255,cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(train_images[i], 235, 255,cv2.THRESH_BINARY)[1]
     #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
     #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     thresh= thresh.astype('uint8')
@@ -93,10 +93,16 @@ for i in range(0,len(train_images)):
         if i%100 ==0:
             print(str(i)+"   finished")
 
-plt.imshow(testing[0][1763], cmap="gray_r")
+plt.imshow(testing[0][1769], cmap="gray_r")
 plt.show()
 
-plt.imshow(training[0][1763] , cmap="gray_r")
+plt.imshow(testing[1][1769], cmap="gray_r")
+plt.show()
+
+plt.imshow(training[0][1769] , cmap="gray_r")
+plt.show()
+
+plt.imshow(training[1][1769] , cmap="gray_r")
 plt.show()
 
 
