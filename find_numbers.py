@@ -18,7 +18,8 @@ example=train_images[1769]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
-
+# Function that recognize digits in an image and rotate the ones with angle to a correct angle
+#Input should be train_images, test_images
 def imagePreprocessing(imageSet):
 
     testing = np.zeros([3, 50000, 28, 28])
