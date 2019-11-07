@@ -2,8 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 from torch.autograd import Variable
+from find_numbers import *
 
 """Variables to determine"""
 batch_size = 64
@@ -105,10 +109,13 @@ model = TheNet()
 model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99"))
 model.eval()
 
-import matplotlib.pyplot as plt
+test_images = pd.read_pickle('test_max_x')
+testPreprocessed = np.zeros([3, 50000, 28, 28])
+testPreprocessed = imagePreprocessing(test_images)
+
 nr=38346
-single_loaded_img= torch.tensor(training[0][nr])
-plt.imshow(training[0][nr] , cmap="gray_r")
+single_loaded_img= torch.tensor(testPreprocessed[0][nr])
+plt.imshow(testPreprocessed[0][nr] , cmap="gray_r")
 plt.show()
 
 nrImage=0

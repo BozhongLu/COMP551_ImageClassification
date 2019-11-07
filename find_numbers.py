@@ -23,7 +23,6 @@ plt.show()
 def imagePreprocessing(imageSet):
 
     testing = np.zeros([3, 50000, 28, 28])
-    #test = np.zeros([3, 50000, 28, 28])
     output = np.zeros([3, 50000, 28, 28])
 
     for i in range(0,len(imageSet)):
@@ -112,6 +111,7 @@ def imagePreprocessing(imageSet):
 
     plt.imshow(output[2][4000], cmap="gray_r")
     plt.show()
+    return output
 
 imagePreprocessing(train_images)
 
