@@ -6,10 +6,13 @@ import tensorflow as tf
 from keras import datasets
 from keras import layers
 from keras import models
-
-
+from keras import losses
+from keras.utils import np_utils
 
 # Build CNN class
+from keras.optimizers import Nadam
+
+
 class CNN(object):
     def __init__(self):
         model = models.Sequential()
@@ -39,7 +42,7 @@ class Data(object):
         # Reshape images
         train_images = train_images.reshape((50000, 128, 128, 1))
         test_images = test_images.reshape((10000, 128, 128, 1))
-        # 像素值映射到 0 - 1 之间
+        # project pixel value between 0 - 1
         train_images, test_images = train_images / 255.0, test_images / 255.0
 
         self.train_images = train_images
@@ -47,17 +50,21 @@ class Data(object):
         self.test_images = test_images
 #       self.test_labels = test_labels
 
+
+
 class Train:
     def __init__(self):
         self.cnn = CNN()
         self.data = Data()
 
     def train(self):
-        self.cnn.model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-        self.cnn.model.fit(self.data.train_images, self.data.train_labels, epochs = 5)
+        self.cnn.model.compile(optimizer='adam',
+                               loss='sparse_categorical_crossentropy',
+                               metrics=['accuracy'])
+        self.cnn.model.fit(self.data.train_images, self.data.train_labels, epochs = 15)
 
         # after fitting the model, test the model accuracy
-        test_loss, test_acc = self.cnn.model.evaluate(self.data.train_labels, self.data.train_labels)
+        test_loss, test_acc = self.cnn.model.evaluate(self.data.train_images, self.data.train_labels)
         print("Accuracy: %.4f" % test_acc)
 
 if __name__ == '__main__':
