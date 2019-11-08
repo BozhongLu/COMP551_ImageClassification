@@ -113,5 +113,6 @@ def imagePreprocessing(imageSet):
     plt.show()
     return output
 
-imagePreprocessing(train_images)
+
+train_images_prep=imagePreprocessing(train_images)
 
