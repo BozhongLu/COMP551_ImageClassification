@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 from torch.autograd import Variable
-from find_numbers import *
+#from find_numbers import *
 
 """Variables to determine"""
 batch_size = 64
@@ -95,11 +95,11 @@ def test():
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
-
+"""
 for epoch in range(1,20):
     train(epoch)
     test ()
-
+"""
 # 99% accuracy after 11 epochs
 
 #torch.save(model.state_dict(), "C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99")
@@ -109,30 +109,41 @@ model = TheNet()
 model.load_state_dict(torch.load("C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99"))
 model.eval()
 
+
 test_images = pd.read_pickle('test_max_x')
 testPreprocessed = np.zeros([3, 50000, 28, 28])
 testPreprocessed = imagePreprocessing(test_images)
+results = np.zeros([4, 50000])
 
-nr=38346
-single_loaded_img= torch.tensor(testPreprocessed[0][nr])
-plt.imshow(testPreprocessed[0][nr] , cmap="gray_r")
-plt.show()
+from PIL import image
 
-nrImage=0
-#single_loaded_img=train_loader.dataset.test_data[nrImage]
-single_loaded_img = single_loaded_img.to(device)
-single_loaded_img = Variable(single_loaded_img)
-single_loaded_img = single_loaded_img[None, None]
-single_loaded_img = single_loaded_img.type('torch.FloatTensor') # instead of DoubleTensor
-
-out = model(single_loaded_img)
-pred = out.data.max(1,keepdim=True)[1]
-pred
-
-plt.imshow(train_loader.dataset.test_data[nrImage] ,cmap="gray_r")
-plt.show()
+for ex in range(0,len(testPreprocessed[1])):
+    for nr in range (0,3):
+        img= torch.tensor(testPreprocessed[nr][ex])
+        img = img.to(device)
+        img = Variable(img)
+        img = img[None, None]
+        img = img.type('torch.FloatTensor') # instead of DoubleTensor
+        out = model(img)
+        pred = out.data.max(1,keepdim=True)[1]
+        results[nr][ex]=np.int(pred[0][0])
+        for t in range(0,4):
+            transposed = colorImage.transpose(Image.ROTATE_90)
 
 
 
+    if ex%100 ==0:
+        print(str(ex) + "   finished")
 
+results[3] = np.amax(results[0:3], axis=0)
+
+# Compare the result and prediction
+train_labels = pd.read_csv('train_max_y.csv')
+train_labels=train_labels.iloc[:,1]
+prediction=np.transpose(results[3])
+
+
+import sklearn.metrics
+sklearn.metrics.accuracy_score(train_labels,prediction)
+sklearn.metrics.confusion_matrix(train_labels,prediction)
 

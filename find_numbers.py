@@ -13,8 +13,9 @@ from PIL import Image
 train_images = pd.read_pickle('train_max_x')
 test_images = pd.read_pickle('test_max_x')
 
-
-example=train_images[4000]
+i=46050
+imageSet=train_images
+example=train_images[i]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
 
@@ -24,34 +25,69 @@ def imagePreprocessing(imageSet):
 
     testing = np.zeros([3, 50000, 28, 28])
     output = np.zeros([3, 50000, 28, 28])
+    b = 0
 
     for i in range(0,len(imageSet)):
         # define white-black threshhold
-        thresh = cv2.threshold(imageSet[i], 230, 255,cv2.THRESH_BINARY)[1]
-        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 3))
-        #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-        thresh= thresh.astype('uint8')
+        underbound=np.percentile(imageSet[i],94)
+
+        minw=8
+        minh=15
+        limit=1
 
 
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
+
         digitCnts = []
-        digitw = []
-
         # loop over the digit area candidates
-        for c in cnts:
-            # compute the bounding box of the contour
-            (x, y, w, h) = cv2.boundingRect(c)
 
-            # if the contour is sufficiently large, it must be a digit
-            #if w >= 8 and (h >= 15 and h <= 40):
-            digitCnts.append(c)
-            digitw.append(w*h)
+        while len(digitCnts) != 3:
+            digitCnts = []
+            thresh = cv2.threshold(imageSet[i], underbound, 255, cv2.THRESH_BINARY)[1]
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1))
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+            thresh = thresh.astype('uint8')
 
+            #plt.imshow(thresh, cmap="gray_r")
+            #plt.show()
+
+            cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = imutils.grab_contours(cnts)
+            len(cnts)
+
+            for c in cnts:
+                # compute the bounding box of the contour
+                (x, y, w, h) = cv2.boundingRect(c)
+                #digitw.append(w * h)
+
+                # if the contour is sufficiently large, it must be a digit
+                if w >= minw and (h >= minh ):
+                    digitCnts.append(c)
+
+            if len(digitCnts)<3:
+                minw = minw - 1
+                minh = minh - 1
+                underbound = underbound-1
+                limit= limit+1
+
+            if len(digitCnts)>3:
+                minw = minw + 1
+                minh = minh + 1
+                underbound= underbound-1
+                limit = limit + 1
+
+            if limit== 100:
+                b = b+1
+                minw = 8
+                minh = 10
+                underbound=200
+
+            if limit==101:
+                break
 
         for n in range(0,3):
-            a=np.where(np.array(digitw)==max(digitw))
-            (x, y, w, h) = cv2.boundingRect(digitCnts[a[0][0]])
+            #a=np.where(np.array(digitw)==max(digitw))
+            #(x, y, w, h) = cv2.boundingRect(digitCnts[a[0][0]])
+            (x, y, w, h) = cv2.boundingRect(digitCnts[n])
             if (x+x+w)/2 >=14:
                 left = round((x+x+w)/2)-14
             elif (x+x+w)/2 <14:
@@ -65,11 +101,10 @@ def imagePreprocessing(imageSet):
                 top = 0
             elif ((y+y+h)/2) <14:
                 top = 0
-
             if top>100:
                 top=100
 
-            del(digitw[a[0][0]])
+            #del(digitw[a[0][0]])
 
             # cut the digits area out from the preprocessed images
             new = thresh[int(top):int(top + 28)]
@@ -77,6 +112,7 @@ def imagePreprocessing(imageSet):
             # Save for comparison
             testing[n][i] = new
             #Rotate the image to a correct angle to improve accuracy
+            """
             coords = np.column_stack(np.where(new > 0))
             angle = cv2.minAreaRect(coords)[-1]
             if angle < -45:
@@ -90,17 +126,19 @@ def imagePreprocessing(imageSet):
             rotated = cv2.warpAffine(new, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
             #Define a clearer threshold for the preprocessed images
             newthresh = cv2.threshold(rotated, 100, 255, cv2.THRESH_BINARY)[1]
-            output[n][i]=newthresh
-            if i%100 ==0:
-                print(str(i)+"   finished")
+            """
+            output[n][i]=new
+            #if i%100 ==0:
+            print(str(i)+"   finished")
     #Testing
-    plt.imshow(testing[0][4000], cmap="gray_r")
+
+    plt.imshow(testing[0][i], cmap="gray_r")
     plt.show()
 
-    plt.imshow(testing[1][4000], cmap="gray_r")
+    plt.imshow(testing[1][i], cmap="gray_r")
     plt.show()
 
-    plt.imshow(testing[2][4000], cmap="gray_r")
+    plt.imshow(testing[2][i], cmap="gray_r")
     plt.show()
 
     plt.imshow(output[0][4000] , cmap="gray_r")
@@ -111,8 +149,7 @@ def imagePreprocessing(imageSet):
 
     plt.imshow(output[2][4000], cmap="gray_r")
     plt.show()
-    return output
+    return output,b
 
 
-train_images_prep=imagePreprocessing(train_images)
-
+[train_images_prep,b]=imagePreprocessing(train_images)

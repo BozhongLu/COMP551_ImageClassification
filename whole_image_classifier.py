@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 from torch.autograd import Variable
-from find_numbers import *
+#from find_numbers import *
 from torchvision import datasets, transforms, models
 import os
 import numpy as np
@@ -56,7 +56,7 @@ def load_split_train_test(datadir, valid_size = .2):
                    sampler=train_sampler, batch_size=64)
     testloader = torch.utils.data.DataLoader(test_data,
                    sampler=test_sampler, batch_size=64)
-    return trainloader, testloadertrainloader, testloader = load_split_train_test(data_dir, .2)
+    return trainloader, testloader,trainloader, testloader = load_split_train_test(data_dir, .2)
 print(trainloader.dataset.classes)
 
 
