@@ -7,9 +7,8 @@ from imutils import contours
 import imutils
 import cv2
 from matplotlib.patches import Rectangle
-from PIL import Image
 
-
+"""
 train_images = pd.read_pickle('train_max_x')
 test_images = pd.read_pickle('test_max_x')
 
@@ -18,13 +17,15 @@ imageSet=train_images
 example=train_images[i]
 plt.imshow(np.array(example), cmap='gray_r')
 plt.show()
-
+"""
 # Function that recognize digits in an image and rotate the ones with angle to a correct angle
 #Input should be train_images, test_images
 def imagePreprocessing(imageSet):
 
-    testing = np.zeros([3, 50000, 28, 28])
-    output = np.zeros([3, 50000, 28, 28])
+    len(imageSet)
+
+    testing = np.zeros([3, len(imageSet), 28, 28])
+    output = np.zeros([3, len(imageSet), 28, 28])
     b = 0
 
     for i in range(0,len(imageSet)):
@@ -132,13 +133,13 @@ def imagePreprocessing(imageSet):
             print(str(i)+"   finished")
     #Testing
 
-    plt.imshow(testing[0][i], cmap="gray_r")
+    plt.imshow(testing[0][3000], cmap="gray_r")
     plt.show()
 
-    plt.imshow(testing[1][i], cmap="gray_r")
+    plt.imshow(testing[1][3000], cmap="gray_r")
     plt.show()
 
-    plt.imshow(testing[2][i], cmap="gray_r")
+    plt.imshow(testing[2][3000], cmap="gray_r")
     plt.show()
 
     plt.imshow(output[0][4000] , cmap="gray_r")
@@ -149,7 +150,7 @@ def imagePreprocessing(imageSet):
 
     plt.imshow(output[2][4000], cmap="gray_r")
     plt.show()
-    return output,b
+    return output
 
 
-[train_images_prep,b]=imagePreprocessing(train_images)
+#train_images_prep=imagePreprocessing(train_images)
