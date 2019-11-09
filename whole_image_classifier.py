@@ -1,153 +1,88 @@
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.model_selection import train_test_split
-from keras.models import Sequential
-from keras.layers import Activation, Dropout, Flatten, Dense
+'''SOME FILTERS '''
+import cv2
+import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+
+train_images = pd.read_pickle('train_max_x')
+
+gray_img = train_images[1].astype("float32")/255# Plot image
+plt.imshow(gray_img, cmap='gray')
+plt.show()
+
+filter_vals = np.array([[-1, -1, 1, 1], [-1, -1, 1, 1], [-1, -1, 1, 1], [-1, -1, 1, 1]])
+print('Filter shape: ', filter_vals.shape)
+
+filter_1 = filter_vals
+filter_2 = -filter_1
+filter_3 = filter_1.T
+filter_4 = -filter_3
+filters = np.array([filter_1, filter_2, filter_3, filter_4])
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from torchvision import datasets, transforms
-from torch.autograd import Variable
-#from find_numbers import *
-from torchvision import datasets, transforms, models
-import os
-import numpy as np
-from sklearn import metrics
-
-train_images = pd.read_pickle('train_max_x')
-test_images = pd.read_pickle('test_max_x')
-train_labels = pd.read_csv('train_max_y.csv')
 
 
-"""Variables to determine"""
-batch_size = 64
-device = torch.device("cpu")
+# Neural network with one convolutional layer with four filters
+class Net(nn.Module):
 
-torch_tensor_output = torch.tensor(train_labels.values)
-torch_tensor_train = torch.from_numpy(train_images)
+    def __init__(self, weight):
+        super(Net, self).__init__()
+        # Initializes the weights of the convolutional layer to be the weights of the 4 defined filters
+        k_height, k_width = weight.shape[2:]
+        # Assumes there are 4 grayscale filters
+        self.conv = nn.Conv2d(1, 4, kernel_size=(k_height, k_width), bias=False)
+        self.conv.weight = torch.nn.Parameter(weight)
 
-trainloader = torch.utils.data.DataLoader(train_images, batch_size=64)
-testloader = torch.utils.data.DataLoader(test_images, batch_size=64)
+    def forward(self, x):
 
-X=torch.Tensor(train_images)
-Y=torch.Tensor(train_labels.iloc[:,1])
+        # Calculates the output of a convolutional layer pre- and post-activation
+        conv_x = self.conv(x)
+        activated_x = F.relu(conv_x)
 
+        # Returns both layers
+        return conv_x, activated_x
 
-def load_split_train_test(datadir, valid_size = .2):
-    train_transforms = transforms.Compose([transforms.Resize(224),
-                                       transforms.ToTensor(),])
-    test_transforms = transforms.Compose([transforms.Resize(224),
-                                      transforms.ToTensor(),])
-    train_data = datasets.ImageFolder(train_images, transform=train_transforms)
-    test_data = datasets.ImageFolder(test_images[1],transform=test_transforms)
-    num_train = len(train_data)
-    indices = list(range(num_train))
-    split = int(np.floor(valid_size * num_train))
-    np.random.shuffle(indices)
-    from torch.utils.data.sampler import SubsetRandomSampler
-    train_idx, test_idx = indices[split:], indices[:split]
-    train_sampler = SubsetRandomSampler(train_idx)
-    test_sampler = SubsetRandomSampler(test_idx)
-    trainloader = torch.utils.data.DataLoader(train_data,
-                   sampler=train_sampler, batch_size=64)
-    testloader = torch.utils.data.DataLoader(test_data,
-                   sampler=test_sampler, batch_size=64)
-    return trainloader, testloader,trainloader, testloader = load_split_train_test(data_dir, .2)
-print(trainloader.dataset.classes)
+# Instantiate the model and set the weights
+weight = torch.from_numpy(filters).unsqueeze(1).type(torch.FloatTensor)
+model = Net(weight)  # Print out the layer in the network
+print(model)
 
 
-kwargs={}
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=True, download=True,
-                   transform=transforms.Compose([
-                       transforms.ToTensor(),
-                       transforms.Normalize((0.1307,), (0.3081,))
-                   ])),
-    batch_size=batch_size, shuffle=True, **kwargs)
+def viz_layer(layer, n_filters=4):
+    fig = plt.figure(figsize=(20, 20))
 
-test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=False, transform=transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])),
-    batch_size=batch_size, shuffle=True, **kwargs)
-
-class TheNet(nn.Module):
-    def __init__(self):
-        super(TheNet,self).__init__()
-        # convolution layer for image processing
-        # put 4 pixels together to kernels
-        # take 1 image in anfd 10 out
-        # kernel size 5: 5x5 pixel
-        self.conv1 = nn.Conv2d(1,20,kernel_size=4)
-        self.conv2 = nn.Conv2d(20,20,kernel_size=4)
-        # useless pixels drop out
-        self.conv_dropout = nn.Dropout2d()
-        # Fullyconnected layer= normal linear layers
-        self.fc1 = nn.Linear(5120,4)
-        self.fc2 = nn.Linear(4, 10)
-
-    def forward(self,x):
-        # Pictures into layer1
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(x, 2)
-        x = F.relu(self.conv2(x))
-        x = self.conv_dropout(x)
-        x = F.max_pool2d(x, 2)
-        #x = x.view(-1,320)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        # classifier, so all need to be 0 or 1
-        return F.log_softmax(x, dim=1)
+    for i in range(n_filters):
+        ax = fig.add_subplot(1, n_filters, i + 1, xticks=[], yticks=[])
+        # Grab layer outputs
+        ax.imshow(np.squeeze(layer[0, i].data.numpy()), cmap='gray')
+        ax.set_title('Output %s' % str(i + 1))
 
 
-model = TheNet().to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.8)
+# Plot original image
+plt.imshow(gray_img, cmap='gray')# Visualize all of the filters
+fig = plt.figure(figsize=(12, 6))
+fig.subplots_adjust(left=0, right=1.5, bottom=0.8, top=1, hspace=0.05, wspace=0.05)
+for i in range(4):
+    ax = fig.add_subplot(1, 4, i+1, xticks=[], yticks=[])
+    ax.imshow(filters[i], cmap='gray')
+    ax.set_title('Filter %s' % str(i+1))# Convert the image into an input tensor
+gray_img_tensor = torch.from_numpy(gray_img).unsqueeze(0).unsqueeze(1)# Get the convolutional layer (pre and post activation)
+conv_layer, activated_layer = model(gray_img_tensor)# Visualize the output of a convolutional layer
+viz_layer(conv_layer)
+plt.show()
 
-def train(epoch):
-    #model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        optimizer.step()
-        if batch_idx % 10 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item()))
+sobel_y = np.array([[-1, -2, -1],
+                    [0, 0, 0],
+                    [1, 2, 1]])
 
-def test():
-    model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            out = model(data)
-            test_loss += F.nll_loss(out, target, size_average=False).item() # sum up batch loss
-            pred = out.data.max(1,keepdim=True)[1]
-            #pred = out.argmax(dim=1, keepdim=True) # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum()
+sobel_x = np.array([[-1, 0, 1],
+                    [0, 0, 0],
+                    [1, 2, 1]])
 
-    test_loss /= len(test_loader.dataset)
+filtered_image = cv2.filter2D(gray_img, -1, sobel_y)
+plt.imshow(filtered_image, cmap='gray')
+plt.show()
 
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
-
-
-
-
-for epoch in range(1,20):
-    train(epoch)
-    test ()
-
-# 99% accuracy after 11 epochs
-
-#torch.save(model.state_dict(), "C:/Users/User/Documents/2_Programming/Machine_Learning/COMP 551/Project3/model_e20_A99")
+viz_layer(activated_layer)
