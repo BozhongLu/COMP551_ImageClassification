@@ -49,7 +49,7 @@ print(vgg_conv.summary())
 #plot_model(model, to_file='vgg.png')
 
 # Freeze the layers except the last 4 layers
-for layer in vgg_conv.layers[:-4]:
+for layer in vgg_conv.layers[:-1]:
     layer.trainable = False
 
 # Check the trainable status of the individual layers
@@ -84,8 +84,8 @@ import tensorflow as tf
 train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
 val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val))
 
-BATCH_SIZE = 64
-SHUFFLE_BUFFER_SIZE = 100
+BATCH_SIZE = 100
+SHUFFLE_BUFFER_SIZE = 10
 
 train_dataset = train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
 val_dataset = val_dataset.batch(BATCH_SIZE)
@@ -94,16 +94,15 @@ val_dataset = val_dataset.batch(BATCH_SIZE)
 """######       COMPILE MODEL           ##########"""
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=optimizers.RMSprop(lr=0.05),
+              optimizer=optimizers.RMSprop(lr=1e-4),
               metrics=['acc'])
 
 # Train the model
 history = model.fit_generator(
     train_dataset,
-    epochs=10,
+    epochs=3,
     validation_data=val_dataset,
     verbose=1)
 
 # Save the model
 #model.save('small_last4.h5')
-
