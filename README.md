@@ -15,3 +15,15 @@ That is, predict the three digits from one image and take the max digit predicte
 Since we are given the train_labels, we can then compare the given train_labels with the predicted labels by us to find the accuracy of the training dataset
 
 If the accuracy is good, we can apply the same strategy on test dataset
+
+
+
+# Nov 10, 5:08pm Update from Leo
+
+- I have uploaded my vgg model and i am stilling training it
+- For model parameters modification:
+  - try to modify the followings
+    - loss
+    - optimizer
+    - learning rate
+    - batch_size
