@@ -78,14 +78,14 @@ print(model_vgg_mnist.summary())
 sgd = SGD(lr=0.01, decay=1e-5)
 
 model_vgg_mnist.compile(loss='categorical_crossentropy',
-                        optimizer=sgd,
+                        optimizer='adam',
                         metrics=['accuracy'])
 model_vgg_mnist.fit(train_images,
                     train_labels,
                     epochs=15,
                     validation_split=0.15,
                     verbose=1,
-                    batch_size=32)
+                    batch_size=64)
 # print accuracy
 result=model_vgg_mnist.evaluate(train_images,train_labels)
 print('\nTrain Accuracy:',result[1])
